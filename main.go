@@ -15,7 +15,7 @@ import (
 )
 
 //go:embed template.txt
-var fsys embed.FS
+var fs embed.FS
 
 type numberDesc struct {
 	Number int32
@@ -30,9 +30,13 @@ type nameDesc struct {
 func main() {
 	input, _ := io.ReadAll(os.Stdin)
 	var req pluginpb.CodeGeneratorRequest
-	proto.Unmarshal(input, &req)
+	err := proto.Unmarshal(input, &req)
+	if err != nil {
+		panic(err)
+	}
 
 	opts := protogen.Options{}
+
 	plugin, err := opts.New(&req)
 	if err != nil {
 		panic(err)
@@ -45,14 +49,10 @@ func main() {
 
 		data := getData(file)
 
-		fs, _ := template.ParseFS(fsys, "template.txt")
-
-		var buf bytes.Buffer
-		_ = fs.Execute(&buf, data)
-
-		filename := file.GeneratedFilenamePrefix + ".enum_desc.pb.go"
-
-		plugin.NewGeneratedFile(filename, file.GoImportPath).Write(buf.Bytes())
+		err = generateFile(plugin, file, data, "template.txt", ".enum_desc.pb.go")
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	out, err := proto.Marshal(plugin.Response())
@@ -60,7 +60,22 @@ func main() {
 		panic(err)
 	}
 
-	os.Stdout.Write(out)
+	_, err = os.Stdout.Write(out)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func generateFile(plugin *protogen.Plugin, file *protogen.File, data map[string]any, templateFile, genFile string) error {
+	t, _ := template.ParseFS(fs, templateFile)
+	var buf bytes.Buffer
+	_ = t.Execute(&buf, data)
+	filename := file.GeneratedFilenamePrefix + genFile
+	_, err := plugin.NewGeneratedFile(filename, file.GoImportPath).Write(buf.Bytes())
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func getData(file *protogen.File) map[string]any {
