@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package example;
+
+import "google/protobuf/descriptor.proto";
+import "nvac/enum_desc.proto";
+
+option go_package = ".;example";
+
+message User {
+  string username = 1;
+  Status status = 2;
+}
+
+enum Status {
+  _ = 0;
+  Active = 1 [(nvac.enum_desc) = "ACTIVE"];
+  Deleted = 2 [(nvac.enum_desc) = "DELETED"];
+}

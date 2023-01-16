@@ -1,0 +1,34 @@
+package {{.Package}}
+
+var (
+	{{.EnumName}}_name_desc = map[int32]string{
+		{{range .NumberDescs }}{{.Number}}: "{{.Desc}}",
+		{{ end }}
+	}
+
+	{{.EnumName}}_value_desc = map[string]string{
+        {{range .NameDescs }}"{{.Name}}": "{{.Desc}}",
+    	{{ end }}
+    }
+)
+
+func New{{.EnumName}}FromNumber(number int32) *{{.EnumName}} {
+	e := {{.EnumName}}(number)
+    return &e
+}
+
+func New{{.EnumName}}FromValue(value string) *{{.EnumName}} {
+	return New{{.EnumName}}FromNumber({{.EnumName}}_value[value])
+}
+
+func (e {{.EnumName}}) GetDesc() string {
+	return {{.EnumName}}_name_desc[int32(e)]
+}
+
+func ({{.EnumName}}) GetDescFromNumber(number int32) string {
+	return {{.EnumName}}_name_desc[number]
+}
+
+func ({{.EnumName}}) GetDescFromName(name string) string {
+	return {{.EnumName}}_value_desc[name]
+}

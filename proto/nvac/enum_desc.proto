@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package nvac;
+
+import "google/protobuf/descriptor.proto";
+
+option go_package = "github.com/nvac/protoc-gen-enum-desc/proto/nvac;nvac";
+
+extend google.protobuf.EnumValueOptions {
+  optional string enum_desc = 61030;
+}
