@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"embed"
 	_ "embed"
+	"fmt"
 	"io"
 	"os"
 	"text/template"
@@ -11,6 +12,7 @@ import (
 	"github.com/nvac/protoc-gen-enum-desc/proto/nvac"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/descriptorpb"
 	"google.golang.org/protobuf/types/pluginpb"
 )
 
@@ -25,6 +27,11 @@ type numberDesc struct {
 type nameDesc struct {
 	Name string
 	Desc string
+}
+
+type nameEnumType struct {
+	Name     string
+	EnumType *descriptorpb.EnumDescriptorProto
 }
 
 func main() {
@@ -83,12 +90,30 @@ func getData(file *protogen.File) map[string]any {
 		"Package": file.GoPackageName,
 	}
 
+	var nameEnumTypes []nameEnumType
+
+	// top-level message
+	for _, message := range file.Proto.GetMessageType() {
+		getEnumTypes(&nameEnumTypes, message, message.GetName())
+	}
+
+	// top-level enum
 	for _, enum := range file.Proto.GetEnumType() {
-		data["EnumName"] = enum.GetName()
+		nameEnumTypes = append(nameEnumTypes, nameEnumType{
+			Name:     enum.GetName(),
+			EnumType: enum,
+		})
+	}
+
+	var enums []map[string]any
+	for _, item := range nameEnumTypes {
+		m := map[string]any{
+			"EnumName": item.Name,
+		}
 
 		var numberDescs []numberDesc
 		var nameDescs []nameDesc
-		for _, value := range enum.Value {
+		for _, value := range item.EnumType.Value {
 			v := proto.GetExtension(value.Options, nvac.E_EnumDesc)
 			numberDescs = append(numberDescs, numberDesc{
 				Number: value.GetNumber(),
@@ -100,9 +125,25 @@ func getData(file *protogen.File) map[string]any {
 				Desc: v.(string),
 			})
 		}
-		data["NumberDescs"] = numberDescs
-		data["NameDescs"] = nameDescs
+		m["NumberDescs"] = numberDescs
+		m["NameDescs"] = nameDescs
+		enums = append(enums, m)
 	}
 
+	data["Enums"] = enums
+
 	return data
+}
+
+func getEnumTypes(nameEnumTypes *[]nameEnumType, descriptor *descriptorpb.DescriptorProto, name string) {
+	for _, enum := range descriptor.GetEnumType() {
+		*nameEnumTypes = append(*nameEnumTypes, nameEnumType{
+			Name:     fmt.Sprintf("%s_%s", name, enum.GetName()),
+			EnumType: enum,
+		})
+	}
+
+	for _, nestedDescriptor := range descriptor.GetNestedType() {
+		getEnumTypes(nameEnumTypes, nestedDescriptor, fmt.Sprintf("%s_%s", name, nestedDescriptor.GetName()))
+	}
 }

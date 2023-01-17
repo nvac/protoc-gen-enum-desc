@@ -1,5 +1,7 @@
 package {{.Package}}
 
+{{range .Enums }}
+
 var (
 	{{.EnumName}}_name_desc = map[int32]string{
 		{{range .NumberDescs }}{{.Number}}: "{{.Desc}}",
@@ -32,3 +34,5 @@ func ({{.EnumName}}) GetDescFromNumber(number int32) string {
 func ({{.EnumName}}) GetDescFromName(name string) string {
 	return {{.EnumName}}_value_desc[name]
 }
+
+{{ end }}

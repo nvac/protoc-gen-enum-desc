@@ -9,5 +9,5 @@ example:
 	       --proto_path=. \
 	       --proto_path=./proto \
  	       --go_out=paths=source_relative:. \
- 	       --enum-desc_out=paths=source_relative,gorm=true:. \
+ 	       --enum-desc_out=paths=source_relative:. \
 	       ./example/user.proto

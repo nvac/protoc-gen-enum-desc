@@ -8,12 +8,39 @@ import "nvac/enum_desc.proto";
 option go_package = ".;example";
 
 message User {
-  string username = 1;
-  Status status = 2;
+  enum Mime {
+    Mime_Unspecified = 0 [(nvac.enum_desc) = "UNSPECIFIED"];
+    Mime_Video = 1 [(nvac.enum_desc) = "VIDEO"];
+    Mime_Image= 2 [(nvac.enum_desc) = "IMAGE"];
+  }
+
+  message NestedUser {
+    enum NestedMime {
+      NestedMime_Unspecified = 0 [(nvac.enum_desc) = "UNSPECIFIED"];
+      NestedMime_Video = 1 [(nvac.enum_desc) = "VIDEO"];
+      NestedMime_Image= 2 [(nvac.enum_desc) = "IMAGE"];
+    }
+    NestedMime nested_mime = 1;
+  }
+
+  NestedUser nested_user = 1;
+  Mime mime = 2;
+  Status status = 3;
+  DayOfWeek day_of_week = 4;
 }
 
 enum Status {
-  _ = 0;
-  Active = 1 [(nvac.enum_desc) = "ACTIVE"];
-  Deleted = 2 [(nvac.enum_desc) = "DELETED"];
+  Status_Unspecified = 0 [(nvac.enum_desc) = "UNSPECIFIED"];
+  Status_Active = 1 [(nvac.enum_desc) = "ACTIVE"];
+  Status_Deleted = 2 [(nvac.enum_desc) = "DELETED"];
+}
+
+enum DayOfWeek {
+  DayOfWeek_Sunday= 0 [(nvac.enum_desc) = "星期天"];
+  DayOfWeek_Monday = 1 [(nvac.enum_desc) = "星期一"];
+  DayOfWeek_Tuesday = 2 [(nvac.enum_desc) = "星期二"];
+  DayOfWeek_Wednesday = 3 [(nvac.enum_desc) = "星期三"];
+  DayOfWeek_Thursday = 4 [(nvac.enum_desc) = "星期四"];
+  DayOfWeek_Friday = 5 [(nvac.enum_desc) = "星期五"];
+  DayOfWeek_Saturday = 6 [(nvac.enum_desc) = "星期六"];
 }
