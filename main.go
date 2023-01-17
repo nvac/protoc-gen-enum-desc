@@ -49,7 +49,7 @@ func main() {
 
 		data := getData(file)
 
-		err = generateFile(plugin, file, data, "template.txt", ".enum_desc.pb.go")
+		err = generateFile(plugin, file, data, "template.txt", "_enum_desc.pb.go")
 		if err != nil {
 			panic(err)
 		}
