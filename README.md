@@ -50,7 +50,7 @@ Generate custom description for proto Enum.
        "github.com/stretchr/testify/assert"
    )
    
-   func TestDayOfWeek(t *testing.T) {
+   func TestStatus(t *testing.T) {
        status := NewStatusFromNumber(1)
        assert.Equal(t, "ACTIVE", status.GetDesc())
    
